@@ -1,0 +1,29 @@
+file = input('Enter file name: ')
+fh = open(file)
+lst = list()
+for line in fh:
+    if line.startswith('From:'):
+        continue
+    elif line.startswith('From'):
+        word = line.split()
+        #print(word)
+        lst.append(word[1])
+#print(lst)
+mail_dict = dict()
+for mail in lst:
+    mail_dict[mail] = mail_dict.get(mail,0) + 1
+    #if mail not in mail_dict:
+     #   mail_dict[mail] = 0
+    #else:
+     #   mail_dict[mail] = mail_dict[mail] + 1
+#print(mail_dict)
+bigcount = None
+bigmail = None
+for mail,count in mail_dict.items():
+    if bigcount is None:
+        bigcount = count
+        bigmail = mail
+    elif count> bigcount:
+        bigcount = count
+        bigmail = mail
+print(bigmail,bigcount)
