@@ -1,0 +1,42 @@
+import urllib.request, urllib.parse, urllib.error
+from urllib.request import urlopen
+import xml.etree.ElementTree as ET
+import ssl
+
+# Ignore SSL certificate errors
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
+sum = 0
+
+url = input('Enter - ')
+xml = urlopen(url, context = ctx).read()
+tree = ET.fromstring(xml)
+#print(tree)
+
+#com = tree.findall('comments/comment')
+#print(com)
+#for i in com:
+    #com = tree.findall('.//count')
+    #print(com)
+    #comments = i.find('count').text
+    #print(comments)
+    #comments_count = int(comments)
+    #print(comments_count)
+    #sum = sum +comments_count
+
+    #(OR the following code also works)
+
+com = tree.findall('.//count')
+print(com)
+for i in com:
+    #print(i)
+    comments = i.text
+    #print(comments)
+    comments_count = int(comments)
+    sum += comments_count
+
+
+    
+print(sum)
