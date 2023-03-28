@@ -1,0 +1,27 @@
+import urllib.request, urllib.parse, urllib.error
+from urllib.request import urlopen
+import json
+import ssl
+
+# Ignore SSL certificate errors
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
+url = input('Enter - ')
+json_url = urlopen(url, context= ctx).read()
+data = json.loads(json_url)
+#print(len(data))
+
+sum = 0
+com = data['comments']
+#print(com)
+
+for item in com:
+    #print(item)
+    comments = item['count']
+    #print(comments)
+    comments_count = int(comments)
+    sum += comments_count
+
+print(sum)
