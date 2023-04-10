@@ -26,14 +26,6 @@ for i in fh:
         else:
             cur.execute('UPDATE Counts SET count = count+1 WHERE org = ?', (domain_name,))
 
-#additions = 0   
-#for i in email_id:
- #   if i in email_id:
-  #      print(email_id)
-        #cur.execute('INSERT INTO Counts (org, count) VALUES (email, additions+1 ), (email,)')
-    #else:
-        #cur.execute('INSERT INTO Counts (org, count) VALUES (email, 1 ),(email,)')
-#print(cur)
 
 conn.commit()
 
