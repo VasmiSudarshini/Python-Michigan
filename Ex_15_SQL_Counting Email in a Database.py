@@ -20,7 +20,7 @@ for i in fh:
         email_id = pieces[1]
         domain_name = email_id.split('@')[1]
         cur.execute('SELECT count FROM Counts WHERE org = ?', (domain_name,)) # going to read this like a file or bunch of data # this line doesnt do anything much
-        row = cur.fetchone() #row is none when u print
+        row = cur.fetchone() #row is none when u print coz count column is none from the above code
         if row is None:
             cur.execute('INSERT INTO Counts (org,count) VALUES (?, 1)', (domain_name,))
         else:
