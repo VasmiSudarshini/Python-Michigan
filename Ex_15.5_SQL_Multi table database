@@ -1,0 +1,94 @@
+import sqlite3
+import xml.etree.ElementTree as ET
+
+#creating a database names ReadingXML and connecting with it
+conn = sqlite3.connect('ReadingXML.sqlite')
+cur = conn.cursor()
+
+#Dropping tables that already exists 
+cur.executescript('''
+                  DROP TABLE if exists Artist; 
+                  DROP TABLE if exists Genre; 
+                  DROP TABLE if exists Album; 
+                  DROP TABLE if exists Track''')
+
+#Creating tables Album, Artist, Genre, Track
+cur.executescript('''
+CREATE TABLE Artist(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                    name TEXT UNIQUE);
+CREATE TABLE Genre(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                   name TEXT UNIQUE);
+CREATE TABLE Album(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                   artist_id INTEGER,
+                   title TEXT UNIQUE);
+CREATE TABLE Track(id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+                   title TEXT UNIQUE,
+                   album_id INTEGER,
+                   genre_id INTEGER,
+                   len INTEGER,
+                   rating INTEGER,
+                   count INTEGER)''')
+
+filename = input('Enter-')
+fh = open(filename)
+
+if len(filename)<1:
+    filename = 'Library.xml'
+
+file = ET.parse(fh)
+all = file.findall('dict/dict/dict')
+
+def lookup(d, key):
+    found = False
+    for child in d:
+        if found:
+            return child.text
+        if child.tag == 'key' and child.text == key:
+            found = True
+    return None
+
+print('dict Count', len(all))
+
+for i in all:
+    if (lookup(i, 'Track ID') is None):
+        continue
+    title_name = lookup(i, 'Name')
+    artist = lookup(i, 'Artist')
+    album = lookup(i, 'Album')
+    genre = lookup(i, 'Genre')
+    count = lookup(i, 'Play Count')
+    length = lookup(i, 'Total Time')
+    rating = lookup(i, 'Rating')
+
+    if title_name is None or artist is None or album is None or genre is None or count is None or length is None or rating is None:
+        continue
+    print(title_name, artist, album, genre, count, length, rating)
+    
+    #populating Artist table and creating artist_id
+    cur.execute('INSERT OR IGNORE INTO Artist(name) VALUES (?)', (artist,)) #IGNORE - this is to blow up if already an artist name exists
+    cur.execute('SELECT id FROM Artist WHERE name = ?', (artist,)) # checking or automatically allocating id for artist table
+    artist_id = cur.fetchone()[0] #creating a variable artist_id ie., the id of Artist table so that it can be put in Album Table
+
+    #populating Genre table and creating genre_id
+    cur.execute('INSERT OR IGNORE INTO Genre(name) VALUES (?)', (genre,))
+    cur.execute('SELECT id FROM Genre WHERE name =?', (genre,))
+    genre_id = cur.fetchone()[0]
+
+    #populating Album table and creating album_id
+    cur.execute('INSERT OR IGNORE INTO Album (title, artist_id) VALUES(?,?)', (album, artist_id))
+    cur.execute('SELECT id FROM Album WHERE title = ?', (album,))
+    album_id = cur.fetchone()[0]
+    
+    #populating Track table 
+    cur.execute('''INSERT OR IGNORE INTO Track(title, album_id, genre_id, len, rating, count) 
+                VALUES (?,?,?,?,?,?)''', (title_name, album_id, genre_id, length, rating, count))
+    cur.execute('SELECT id FROM Track WHERE title = ?', (title_name,))
+
+
+
+    conn.commit()
+
+sql_str = cur.execute('SELECT * FROM Artist LIMIT 5')
+
+for i in sql_str:
+    print(str(i[0]), str(i[1]))
